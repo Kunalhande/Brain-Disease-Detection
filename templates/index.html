@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Disease Detection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url('/static/brain_bg.webp') no-repeat center fixed;
+            background-size: cover;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-info" href="/">Brain Disease Detection</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    {% if session.user_id %}
+                    <li class="nav-item">
+                        <span class="nav-link text-white">Hello, <strong>{{ session.user_name }}</strong></span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-info px-3 mx-2" href="{{ url_for('history') }}">History</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-info px-3 mx-2" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-info px-3 mx-2" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-info px-3" href="{{ url_for('signup') }}">Sign Up</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-3">
+        <div class="row justify-content-center">
+            <!-- Do's Section -->
+            <div class="col-md-2">
+                {% if dos %}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white text-center">
+                        <h5 class="mb-0">Do's</h5>
+                    </div>
+                    <div class="card-body">
+                        {{ dos_donts }}
+                        <ul class="list-group">
+                            {% for do in dos %}
+                            <li class="list-group-item">{{ do }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <div class="card mb-4 bg-dark border-none shadow" style="--bs-bg-opacity: .4">
+                    <div class="text-center">
+                        <h1 class="display-5 fw-bold text-info">Brain Disease Detection</h1>
+                        <p class="text-white">Upload an MRI image to detect Tumor/Stroke/Alzheimer.</p>
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <form action="/predict" method="post" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="fileInput" class="form-label">Choose an Image</label>
+                                <input type="file" name="file" class="form-control" id="fileInput" accept="image/*"
+                                    required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-info text-white">Upload and Detect</button>
+                            </div>
+                        </form>
+
+                        <!-- Error Message -->
+                        {% if error %}
+                        <div class="alert alert-danger mt-3">{{ error }}</div>
+                        {% endif %}
+
+                        <!-- Uploaded Image Preview -->
+                        {% if image %}
+                        <div class="text-center">
+                            <img src="{{ url_for('static', filename='uploads/' + image) }}" alt="Uploaded Image"
+                                class="img-fluid rounded border mt-3" width="300" height="300">
+                        </div>
+                        {% endif %}
+
+                        <!-- Results Section -->
+                        {% if tumor is not none or stroke is not none or alzheimer is not none %}
+                        <div class="mt-4">
+                            <h5 class="text-center">Detection Results</h5>
+                            <div class="row justify-content-center">
+                                <div class="col-10 col-md-5 p-3">
+                                    <div class="card text-center rounded-3 mx-3">
+                                        <div
+                                            class="card-body {{ 'bg-danger text-white' if tumor == 'Yes' else 'bg-success text-white' }} rounded-3">
+                                            <h6 class="card-title">Tumor Detection</h6>
+                                            <p class="card-text fw-bold">{{ tumor }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-10 col-md-5 p-3">
+                                    <div class="card text-center rounded-3 mx-3">
+                                        <div
+                                            class="card-body {{ 'bg-danger text-white' if stroke == 'Yes' else 'bg-success text-white' }} rounded-3">
+                                            <h6 class="card-title">Stroke Detection</h6>
+                                            <p class="card-text fw-bold">{{ stroke }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-10 col-md-5 p-3">
+                                    <div class="card text-center rounded-3 mx-3">
+                                        <div
+                                            class="card-body {{ 'bg-danger text-white' if alzheimer == 'Yes' else 'bg-success text-white' }} rounded-3">
+                                            <h6 class="card-title">Alzheimer Detection</h6>
+                                            <p class="card-text fw-bold">{{ alzheimer }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <small class="text-center text-secondary">Prediction models are trained on specific data
+                                    and sometimes can make mistakes. Check important info.</small>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if tumor == 'Yes' or stroke == 'Yes' or alzheimer == 'Yes' %}
+                        <div class="mt-4">
+                            <label for="citySelect" class="form-label">Select City</label>
+                            <select id="citySelect" class="form-control">
+                                <option value="">-- Select City --</option>
+                                {% for city in cities %}
+                                <option value="{{ city }}">{{ city }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mt-4" id="hospitalTable" style="display:none;">
+                            <h4 class="text-center text-info">Recommended Hospitals</h4>
+                            <table class="table table-bordered table-striped mt-3">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Address</th>
+                                        <th>Areas Served</th>
+                                        <th>Hours</th>
+                                        <th>Phone</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hospitalList"></tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                {% if donts %}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-danger text-white text-center">
+                        <h5 class="mb-0">Don'ts</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for dont in donts %}
+                            <li class="list-group-item">{{ dont }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        document.getElementById('citySelect').addEventListener('change', function () {
+            let city = this.value;
+            if (city) {
+                fetch(`/get_hospitals?city=${city}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let tableBody = document.getElementById('hospitalList');
+                        tableBody.innerHTML = '';
+                        data.forEach(hospital => {
+                            let row = `<tr>
+                            <td>${hospital["Clinic/Hospital Name"]}</td>
+                            <td>${hospital["Address"]}</td>
+                            <td>${hospital["Areas Served"]}</td>
+                            <td>${hospital["Hours"]}</td>
+                            <td>${hospital["Phone"]}</td>
+                        </tr>`;
+                            tableBody.innerHTML += row;
+                        });
+                        document.getElementById('hospitalTable').style.display = 'block';
+                    });
+            } else {
+                document.getElementById('hospitalTable').style.display = 'none';
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

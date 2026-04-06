@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: url('/static/login_bg.jpg') no-repeat center fixed;
+            background-size: cover;
+            position: relative;
+        }
+
+        /* Dark overlay for better readability */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .card-container {
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+</head>
+
+<body class="d-flex justify-content-center align-items-center vh-100 bg-light">
+    <div>
+        <div class="card shadow-lg p-4 rounded-4 mb-4 card-container" style="background: rgba(255, 255, 255, 0.9);">
+            <div class="text-center">
+                <h1 class="display-5 fw-bold text-info">Brain Disease Detection</h1>
+            </div>
+        </div>
+        <div class="card shadow-lg p-4 rounded-4 card-container mx-auto"
+            style="width: 400px; background: rgba(255, 255, 255, 0.9);">
+            <h3 class="text-center text-info fw-bold mb-3">Welcome Back</h3>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('login') }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input type="email" name="email" class="form-control" required placeholder="Enter your email">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Password</label>
+                    <input type="password" name="password" class="form-control" required
+                        placeholder="Enter your password">
+                </div>
+
+                <button type="submit" class="btn btn-info w-100 text-white btn-lg">Login</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <small>Don't have an account? <a href="{{ url_for('signup') }}" class="text-info fw-semibold">Sign
+                        up</a></small>
+            </div>
+            <div class="text-center mt-2">
+                <small><a href="{{ url_for('home') }}" class="text-info fw-semibold">Go to Home</a></small>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
